@@ -16,6 +16,9 @@ abstract interface class UserRepositoryBase {
 
   /// Userを削除する
   Future<void> delete(int userId);
+
+  /// 全てのユーザーを削除する
+  Future<void> deleteAll();
 }
 
 class UserRepository implements UserRepositoryBase {
@@ -55,12 +58,21 @@ class UserRepository implements UserRepositoryBase {
       await isar.userEntities.put(userEntity);
     });
   }
+
+  @override
+  Future<void> deleteAll() async {
+    final isar = await ref.read(isarProvider.future);
+    await isar.writeTxn(() async {
+      await isar.userEntities.clear();
+    });
+  }
 }
 
 extension UserEntityMapper on UserEntity {
   // UserEntityからUserへの変換
   User toDomain() {
     return User(
+      id: id,
       name: name,
       age: age,
       isDrinkingAlcohol: isDrinkingAlcohol,
@@ -73,6 +85,7 @@ extension UserMapper on User {
   // UserからUserEntityへの変換
   UserEntity toEntity() {
     return UserEntity()
+      ..id = id ?? Isar.autoIncrement
       ..name = name
       ..age = age
       ..isDrinkingAlcohol = isDrinkingAlcohol
