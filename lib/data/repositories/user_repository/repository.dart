@@ -12,7 +12,7 @@ abstract interface class UserRepositoryBase {
   Future<void> create(User user);
 
   /// Userを更新する
-  Future<void> save(User user);
+  Future<void> update(User user);
 
   /// Userを削除する
   Future<void> delete(int userId);
@@ -31,7 +31,7 @@ class UserRepository implements UserRepositoryBase {
     final isar = await ref.read(isarProvider.future);
     final userEntity = user.toEntity();
     await isar.writeTxn(() async {
-      await isar.userEntities.put(userEntity);
+      await isar.userEntitys.put(userEntity);
     });
   }
 
@@ -39,23 +39,23 @@ class UserRepository implements UserRepositoryBase {
   Future<void> delete(int userId) async {
     final isar = await ref.read(isarProvider.future);
     await isar.writeTxn(() async {
-      await isar.userEntities.delete(userId);
+      await isar.userEntitys.delete(userId);
     });
   }
 
   @override
   Future<List<User>> findAll() async {
     final isar = await ref.read(isarProvider.future);
-    final userEntities = await isar.userEntities.where().findAll();
-    return userEntities.map((entity) => entity.toDomain()).toList();
+    final userEntitys = await isar.userEntitys.where().findAll();
+    return userEntitys.map((entity) => entity.toDomain()).toList();
   }
 
   @override
-  Future<void> save(User user) async {
+  Future<void> update(User user) async {
     final isar = await ref.read(isarProvider.future);
     final userEntity = user.toEntity();
     await isar.writeTxn(() async {
-      await isar.userEntities.put(userEntity);
+      await isar.userEntitys.put(userEntity);
     });
   }
 
@@ -63,13 +63,13 @@ class UserRepository implements UserRepositoryBase {
   Future<void> deleteAll() async {
     final isar = await ref.read(isarProvider.future);
     await isar.writeTxn(() async {
-      await isar.userEntities.clear();
+      await isar.userEntitys.clear();
     });
   }
 }
 
 extension UserEntityMapper on UserEntity {
-  // UserEntityからUserへの変換
+  /// UserEntityからUserへの変換
   User toDomain() {
     return User(
       id: id,
@@ -82,7 +82,7 @@ extension UserEntityMapper on UserEntity {
 }
 
 extension UserMapper on User {
-  // UserからUserEntityへの変換
+  /// UserからUserEntityへの変換
   UserEntity toEntity() {
     return UserEntity()
       ..id = id ?? Isar.autoIncrement

@@ -1,5 +1,7 @@
-// ignore_for_file: public_member_api_docs, constant_identifier_names
+import 'package:isar_sample/domains/home_town.dart';
 
+/// アプリ上で扱うユーザーの情報の型
+/// 正確にはアプリケーション層とプレゼンテーション層で扱うユーザーの情報の型
 class User {
   User({
     required this.name,
@@ -14,6 +16,8 @@ class User {
   final bool isDrinkingAlcohol;
   final HomeTown homeTown;
 
+  /// ユーザー情報の一部を変更して新しいUserオブジェクトを作成するメソッド
+  /// 指定されたプロパティのみが更新され、指定されていないプロパティは元の値が引き継がれる
   User copyWith({
     int? id,
     String? name,
@@ -29,13 +33,4 @@ class User {
       homeTown: homeTown ?? this.homeTown,
     );
   }
-}
-
-enum HomeTown {
-  Tokyo,
-  Osaka,
-  Kyoto,
-  Sapporo,
-  Fukuoka,
-  Sendai,
 }

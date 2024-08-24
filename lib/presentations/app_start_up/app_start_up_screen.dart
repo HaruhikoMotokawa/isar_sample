@@ -13,16 +13,14 @@ class AppStartupScreen extends ConsumerWidget {
     final appStartupState = ref.watch(appStartupProvider);
     return switch (appStartupState) {
       AsyncData() => onLoaded(context),
-      AsyncError(:final error) => AppStartUpError(error: error),
-      _ => const AppStartUpLoading(),
+      AsyncError(:final error) => _AppStartUpError(error: error),
+      _ => const _AppStartUpLoading(),
     };
   }
 }
 
-class AppStartUpLoading extends StatelessWidget {
-  const AppStartUpLoading({
-    super.key,
-  });
+class _AppStartUpLoading extends StatelessWidget {
+  const _AppStartUpLoading();
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +32,8 @@ class AppStartUpLoading extends StatelessWidget {
   }
 }
 
-class AppStartUpError extends ConsumerWidget {
-  const AppStartUpError({
-    required this.error,
-    super.key,
-  });
+class _AppStartUpError extends ConsumerWidget {
+  const _AppStartUpError({required this.error});
 
   final Object error;
 

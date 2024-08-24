@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:isar_sample/data/repositories/user_repository/provider.dart';
+import 'package:isar_sample/domains/home_town.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -26,8 +27,6 @@ class HomeViewModel extends _$HomeViewModel {
 
   /// ユーザー情報の更新と取得
   ///
-  /// [user] 更新対象のユーザー情報
-  /// [return] 更新後のユーザー情報リスト
   /// 更新内容はidとname以外の項目をランダムに更新する
   Future<List<User>> updateAndFetchUser(User user) async {
     final randomUser = _createRandomUser();
@@ -38,7 +37,7 @@ class HomeViewModel extends _$HomeViewModel {
       isDrinkingAlcohol: randomUser.isDrinkingAlcohol,
       homeTown: randomUser.homeTown,
     );
-    await ref.read(userRepositoryProvider).save(updatedUser);
+    await ref.read(userRepositoryProvider).update(updatedUser);
     return fetchAllUsers();
   }
 

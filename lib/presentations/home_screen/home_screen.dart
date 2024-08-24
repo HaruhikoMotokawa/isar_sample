@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:isar_sample/domains/home_town.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:isar_sample/presentations/home_screen/home_view_model.dart';
 
