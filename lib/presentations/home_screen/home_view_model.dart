@@ -7,23 +7,30 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_view_model.g.dart';
 
+/// ホーム画面のViewModel
 @riverpod
 class HomeViewModel extends _$HomeViewModel {
   @override
   void build() {}
 
+  /// ユーザー情報の作成と取得
   Future<List<User>> createAndFetchUser() async {
     final user = _createRandomUser();
     await ref.read(userRepositoryProvider).create(user);
     return fetchAllUsers();
   }
 
+  /// ユーザー情報の取得
   Future<List<User>> fetchAllUsers() async =>
       ref.read(userRepositoryProvider).findAll();
 
+  /// ユーザー情報の更新と取得
+  ///
+  /// [user] 更新対象のユーザー情報
+  /// [return] 更新後のユーザー情報リスト
+  /// 更新内容はidとname以外の項目をランダムに更新する
   Future<List<User>> updateAndFetchUser(User user) async {
     final randomUser = _createRandomUser();
-    // ランダムな内容でユーザー情報を更新する
     final updatedUser = user.copyWith(
       id: user.id,
       name: user.name,
@@ -35,6 +42,7 @@ class HomeViewModel extends _$HomeViewModel {
     return fetchAllUsers();
   }
 
+  /// ユーザー情報の削除と取得
   Future<List<User>> deleteAndFetchUser(User user) async {
     final userId = user.id;
     if (userId == null) return fetchAllUsers();
@@ -42,14 +50,16 @@ class HomeViewModel extends _$HomeViewModel {
     return fetchAllUsers();
   }
 
+  /// ユーザー情報の初期化
   Future<List<User>> initUser() async {
     await ref.read(userRepositoryProvider).deleteAll();
     return [];
   }
 
+  /// ランダムなユーザー情報の生成
   User _createRandomUser() {
+    // 乱数生成のためのインスタンス
     final random = Random();
-
     // ランダムな名前の生成 (アルファベットをランダムに結合)
     final name =
         String.fromCharCodes(List.generate(5, (_) => random.nextInt(26) + 65));
