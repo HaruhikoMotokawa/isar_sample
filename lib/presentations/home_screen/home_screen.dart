@@ -13,7 +13,6 @@ class HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final viewModel = ref.watch(homeViewModelProvider.notifier);
-    const items = 10;
 
     final users = useState<List<User>>([]);
 
@@ -37,9 +36,9 @@ class HomeScreen extends HookConsumerWidget {
           return Container(
             decoration: BoxDecoration(
               border: Border(
-                top: const BorderSide(color: Colors.black12),
-                bottom: index == items - 1
-                    ? const BorderSide(color: Colors.black12)
+                top: const BorderSide(color: Colors.grey),
+                bottom: index == users.value.length - 1
+                    ? const BorderSide(color: Colors.grey)
                     : BorderSide.none,
               ),
             ),
@@ -66,11 +65,13 @@ class HomeScreen extends HookConsumerWidget {
         children: [
           FloatingActionButton(
             onPressed: () => initUsersAction(context, viewModel, users),
+            backgroundColor: Colors.lightBlueAccent,
             child: const Icon(Icons.local_fire_department),
           ),
           const Gap(10),
           FloatingActionButton(
             onPressed: () => createUserAction(context, viewModel, users),
+            backgroundColor: Colors.lightBlueAccent,
             child: const Icon(Icons.add),
           ),
         ],
