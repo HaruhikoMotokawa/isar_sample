@@ -45,19 +45,18 @@ class HomeScreen extends HookConsumerWidget {
             ),
             child: _UserListTile(
               user: users.value[index],
-              onTap: () async {
-                final updateUser = users.value[index];
-                users.value = await viewModel.updateAndFetchUser(updateUser);
-                if (!context.mounted) return;
-                showSnackBar(context, '${updateUser.name}を更新しました');
-              },
-              onLongPress: () async {
-                final deleteUserName = users.value[index].name;
-                users.value =
-                    await viewModel.deleteAndFetchUser(users.value[index]);
-                if (!context.mounted) return;
-                showSnackBar(context, '$deleteUserNameを削除しました');
-              },
+              onTap: () => updateUserAction(
+                context,
+                viewModel,
+                users,
+                users.value[index],
+              ),
+              onLongPress: () => deleteUserAction(
+                context,
+                viewModel,
+                users,
+                users.value[index],
+              ),
             ),
           );
         },
@@ -66,20 +65,12 @@ class HomeScreen extends HookConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () async {
-              users.value = await viewModel.initUser();
-              if (!context.mounted) return;
-              showSnackBar(context, '全てのユーザーを削除しました');
-            },
+            onPressed: () => initUsersAction(context, viewModel, users),
             child: const Icon(Icons.local_fire_department),
           ),
           const Gap(10),
           FloatingActionButton(
-            onPressed: () async {
-              users.value = await viewModel.createAndFetchUser();
-              if (!context.mounted) return;
-              showSnackBar(context, 'ユーザーを新規作成しました');
-            },
+            onPressed: () => createUserAction(context, viewModel, users),
             child: const Icon(Icons.add),
           ),
         ],
@@ -89,6 +80,53 @@ class HomeScreen extends HookConsumerWidget {
 }
 
 extension on HomeScreen {
+  /// ユーザーを追加するアクション
+  Future<void> createUserAction(
+    BuildContext context,
+    HomeViewModel viewModel,
+    ValueNotifier<List<User>> users,
+  ) async {
+    users.value = await viewModel.createAndFetchUser();
+    if (!context.mounted) return;
+    showSnackBar(context, 'ユーザーを新規作成しました');
+  }
+
+  /// ユーザーデータを初期化するアクショ
+  Future<void> initUsersAction(
+    BuildContext context,
+    HomeViewModel viewModel,
+    ValueNotifier<List<User>> users,
+  ) async {
+    users.value = await viewModel.initUser();
+    if (!context.mounted) return;
+    showSnackBar(context, '全てのユーザーを削除しました');
+  }
+
+  /// ユーザー情報を更新するアクション
+  Future<void> updateUserAction(
+    BuildContext context,
+    HomeViewModel viewModel,
+    ValueNotifier<List<User>> users,
+    User updateUser,
+  ) async {
+    users.value = await viewModel.updateAndFetchUser(updateUser);
+    if (!context.mounted) return;
+    showSnackBar(context, '${updateUser.name}を更新しました');
+  }
+
+  /// ユーザー情報を削除する処理
+  Future<void> deleteUserAction(
+    BuildContext context,
+    HomeViewModel viewModel,
+    ValueNotifier<List<User>> users,
+    User deleteUser,
+  ) async {
+    users.value = await viewModel.deleteAndFetchUser(deleteUser);
+    if (!context.mounted) return;
+    showSnackBar(context, '${deleteUser.name}を削除しました');
+  }
+
+  /// SnackBarを表示する
   void showSnackBar(BuildContext context, String content) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -120,6 +158,15 @@ class _UserListTile extends StatelessWidget {
       ),
       onTap: onTap,
       onLongPress: onLongPress,
+      // 背景色はホームタウンによって色を変えたい
+      tileColor: switch (user.homeTown) {
+        HomeTown.Fukuoka => Colors.red,
+        HomeTown.Osaka => Colors.brown,
+        HomeTown.Tokyo => Colors.green,
+        HomeTown.Kyoto => Colors.yellow,
+        HomeTown.Sapporo => Colors.purple,
+        HomeTown.Sendai => Colors.orange,
+      },
     );
   }
 }
