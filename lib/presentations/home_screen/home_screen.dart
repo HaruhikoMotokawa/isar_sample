@@ -160,7 +160,6 @@ class _UserListTile extends StatelessWidget {
       ),
       onTap: onTap,
       onLongPress: onLongPress,
-      // 背景色はホームタウンによって色を変えたい
       tileColor: switch (user.homeTown) {
         HomeTown.Fukuoka => Colors.red,
         HomeTown.Osaka => Colors.brown,
