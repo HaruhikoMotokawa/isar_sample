@@ -15,7 +15,7 @@ class HomeViewModel extends _$HomeViewModel {
   /// ユーザー情報の作成と取得
   Future<List<User>> createAndFetchUser() async {
     final user = User.random();
-    await ref.read(userRepositoryProvider).create(user);
+    await ref.read(userRepositoryProvider).save(user);
     return fetchAllUsers();
   }
 
@@ -28,7 +28,7 @@ class HomeViewModel extends _$HomeViewModel {
   /// 更新内容はidとname以外の項目をランダムに更新する
   Future<List<User>> updateAndFetchUser(User user) async {
     final updatedUser = user.createUpdatedUser();
-    await ref.read(userRepositoryProvider).update(updatedUser);
+    await ref.read(userRepositoryProvider).save(updatedUser);
     return fetchAllUsers();
   }
 

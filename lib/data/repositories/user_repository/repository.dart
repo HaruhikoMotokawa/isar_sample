@@ -8,16 +8,13 @@ abstract interface class UserRepositoryBase {
   /// 全てのUser情報を検索する
   Future<List<User>> findAll();
 
-  /// Userを新規作成する
-  Future<void> create(User user);
-
-  /// Userを更新する
-  Future<void> update(User user);
+  /// Userを保存する
+  Future<void> save(User user);
 
   /// Userを削除する
   Future<void> delete(int userId);
 
-  /// 全てのユーザーを削除する
+  /// 全てのUserを削除する
   Future<void> deleteAll();
 }
 
@@ -27,7 +24,7 @@ class UserRepository implements UserRepositoryBase {
   final ProviderRef<dynamic> ref;
 
   @override
-  Future<void> create(User user) async {
+  Future<void> save(User user) async {
     final isar = await ref.read(isarProvider.future);
     final userEntity = user.toEntity();
     await isar.writeTxn(() async {
@@ -48,15 +45,6 @@ class UserRepository implements UserRepositoryBase {
     final isar = await ref.read(isarProvider.future);
     final userEntitys = await isar.userEntitys.where().findAll();
     return userEntitys.map((entity) => entity.toDomain()).toList();
-  }
-
-  @override
-  Future<void> update(User user) async {
-    final isar = await ref.read(isarProvider.future);
-    final userEntity = user.toEntity();
-    await isar.writeTxn(() async {
-      await isar.userEntitys.put(userEntity);
-    });
   }
 
   @override
