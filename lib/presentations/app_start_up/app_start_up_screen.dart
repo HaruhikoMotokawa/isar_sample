@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_sample/presentations/app_start_up/provider.dart';
 
-/// 初期化を待つためのウィジェット
+/// 初期化を待つための画面
 class AppStartupScreen extends ConsumerWidget {
   const AppStartupScreen({required this.onLoaded, super.key});
 
