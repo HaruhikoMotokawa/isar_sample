@@ -1,6 +1,9 @@
 import 'dart:math';
 
+import 'package:isar_sample/domains/dragon_ball_character.dart';
+import 'package:isar_sample/domains/entities/user_entity.dart';
 import 'package:isar_sample/domains/home_town.dart';
+import 'package:isar_sample/domains/pet.dart';
 
 /// アプリ上で扱うユーザーの情報の型
 /// 正確にはアプリケーション層とプレゼンテーション層で扱うユーザーの情報の型
@@ -10,33 +13,51 @@ class User {
     required this.age,
     required this.isDrinkingAlcohol,
     required this.homeTown,
+    required this.pet,
+    required this.dragonBallCharacter,
     this.id,
+    this.skill,
   });
 
   /// ランダムな値でUserオブジェクトを生成するファクトリメソッド
   User.random()
-      : name = String.fromCharCodes(
+      : id = null,
+        name = String.fromCharCodes(
           List.generate(5, (_) => Random().nextInt(26) + 65),
         ),
         age = Random().nextInt(43) + 18,
         isDrinkingAlcohol = Random().nextBool(),
         homeTown = HomeTown.values[Random().nextInt(HomeTown.values.length)],
-        id = null;
+        skill = Random().nextBool()
+            ? null
+            : Skill(
+                name: 'Skill ${Random().nextInt(100)}',
+                description: 'A random skill',
+                yearsOfExperience: Random().nextInt(10),
+              ),
+        pet = Pet.values[Random().nextInt(Pet.values.length)],
+        dragonBallCharacter = DragonBallCharacter
+            .values[Random().nextInt(DragonBallCharacter.values.length)];
 
   final int? id;
   final String name;
   final int age;
   final bool isDrinkingAlcohol;
   final HomeTown homeTown;
+  final Pet pet;
+  final DragonBallCharacter dragonBallCharacter;
+  final Skill? skill;
 
   /// ユーザー情報の一部を変更して新しいUserオブジェクトを作成するメソッド
-  /// 指定されたプロパティのみが更新され、指定されていないプロパティは元の値が引き継がれる
   User copyWith({
     int? id,
     String? name,
     int? age,
     bool? isDrinkingAlcohol,
     HomeTown? homeTown,
+    Pet? pet,
+    DragonBallCharacter? dragonBallCharacter,
+    Skill? skill,
   }) {
     return User(
       id: id ?? this.id,
@@ -44,17 +65,22 @@ class User {
       age: age ?? this.age,
       isDrinkingAlcohol: isDrinkingAlcohol ?? this.isDrinkingAlcohol,
       homeTown: homeTown ?? this.homeTown,
+      pet: pet ?? this.pet,
+      dragonBallCharacter: dragonBallCharacter ?? this.dragonBallCharacter,
+      skill: skill ?? this.skill,
     );
   }
 
   /// ランダムな値で指定されたユーザー情報を更新するメソッド
-  /// IDと名前はそのままに、他のプロパティをランダムに更新します
   User createUpdatedUser() {
     final randomUser = User.random();
     return copyWith(
       age: randomUser.age,
       isDrinkingAlcohol: randomUser.isDrinkingAlcohol,
       homeTown: randomUser.homeTown,
+      pet: randomUser.pet,
+      dragonBallCharacter: randomUser.dragonBallCharacter,
+      skill: randomUser.skill,
     );
   }
 }

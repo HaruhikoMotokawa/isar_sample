@@ -65,6 +65,15 @@ extension UserEntityMapper on UserEntity {
       age: age,
       isDrinkingAlcohol: isDrinkingAlcohol,
       homeTown: homeTown,
+      pet: pet,
+      dragonBallCharacter: dragonBallCharacter,
+      skill: skill != null
+          ? Skill(
+              name: skill!.name,
+              description: skill!.description,
+              yearsOfExperience: skill!.yearsOfExperience,
+            )
+          : null,
     );
   }
 }
@@ -77,6 +86,15 @@ extension UserMapper on User {
       ..name = name
       ..age = age
       ..isDrinkingAlcohol = isDrinkingAlcohol
-      ..homeTown = homeTown;
+      ..homeTown = homeTown
+      ..pet = pet
+      ..dragonBallCharacter = dragonBallCharacter
+      ..skill = skill != null
+          ? Skill(
+              name: skill!.name,
+              description: skill!.description,
+              yearsOfExperience: skill!.yearsOfExperience,
+            )
+          : null;
   }
 }

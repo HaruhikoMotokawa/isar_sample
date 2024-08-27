@@ -146,15 +146,27 @@ class _UserListTile extends StatelessWidget {
   });
 
   final User user;
-
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.person),
       title: Text(user.name),
-      subtitle: Text('Age: ${user.age}, Hometown: ${user.homeTown.name}'),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Age: ${user.age}, Hometown: ${user.homeTown.name}'),
+          Text('Pet: ${user.pet.species} (${user.pet.age} years old)'),
+          Text('Power Level: ${user.dragonBallCharacter.powerLevel}'),
+          if (user.skill != null) ...[
+            Text('Skill: ${user.skill!.name}'),
+            Text('Description: ${user.skill!.description ?? "No description"}'),
+            Text('Experience: ${user.skill!.yearsOfExperience} years'),
+          ],
+        ],
+      ),
       trailing: Icon(
         user.isDrinkingAlcohol ? Icons.local_bar : Icons.no_drinks,
       ),
