@@ -16,6 +16,16 @@ abstract interface class UserRepositoryBase {
 
   /// 全てのUserを削除する
   Future<void> deleteAll();
+
+  /// 複数のUserを保存する
+  ///
+  /// オプションで同期出来るようにする
+  Future<void> saveBatch(List<User> users, {bool sync = false});
+
+  /// 複数のUserを削除する
+  ///
+  /// オプションで同期出来るようにする
+  Future<void> deleteBatch(List<int> userIds, {bool sync = false});
 }
 
 class UserRepository implements UserRepositoryBase {
@@ -53,6 +63,36 @@ class UserRepository implements UserRepositoryBase {
     await isar.writeTxn(() async {
       await isar.userEntitys.clear();
     });
+  }
+
+  @override
+  Future<void> saveBatch(List<User> users, {bool sync = false}) async {
+    final isar = await ref.read(isarProvider.future);
+    final userEntities = users.map((user) => user.toEntity()).toList();
+    if (sync) {
+      isar.writeTxnSync(() {
+        isar.userEntitys.putAllSync(userEntities);
+      });
+    } else {
+      await isar.writeTxn(() async {
+        await isar.userEntitys.putAll(userEntities);
+      });
+    }
+  }
+
+  @override
+  Future<void> deleteBatch(List<int> userIds, {bool sync = false}) async {
+    final isar = await ref.read(isarProvider.future);
+
+    if (sync) {
+      isar.writeTxnSync(() {
+        isar.userEntitys.deleteAllSync(userIds);
+      });
+    } else {
+      await isar.writeTxn(() async {
+        await isar.userEntitys.deleteAll(userIds);
+      });
+    }
   }
 }
 
