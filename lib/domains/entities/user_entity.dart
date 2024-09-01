@@ -55,7 +55,3 @@ class Skill {
   final String? description; // 特技の説明
   final int? yearsOfExperience; // 経験年数
 }
-
-// FIXME: 後で消す
-// Enumの場合、notNullで初期値を指定していない場合は自動で１行目を選択してくれていた
-// nullableな場合はnullになっていた
