@@ -44,11 +44,11 @@ const UserEntitySchema = CollectionSchema(
       name: r'name',
       type: IsarType.string,
     ),
-    r'pet': PropertySchema(
+    r'pets': PropertySchema(
       id: 5,
-      name: r'pet',
-      type: IsarType.string,
-      enumMap: _UserEntitypetEnumValueMap,
+      name: r'pets',
+      type: IsarType.stringList,
+      enumMap: _UserEntitypetsEnumValueMap,
     ),
     r'skill': PropertySchema(
       id: 6,
@@ -79,7 +79,18 @@ int _userEntityEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.homeTown.name.length * 3;
   bytesCount += 3 + object.name.length * 3;
-  bytesCount += 3 + object.pet.name.length * 3;
+  {
+    final list = object.pets;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += value.name.length * 3;
+        }
+      }
+    }
+  }
   {
     final value = object.skill;
     if (value != null) {
@@ -101,7 +112,7 @@ void _userEntitySerialize(
   writer.writeString(offsets[2], object.homeTown.name);
   writer.writeBool(offsets[3], object.isDrinkingAlcohol);
   writer.writeString(offsets[4], object.name);
-  writer.writeString(offsets[5], object.pet.name);
+  writer.writeStringList(offsets[5], object.pets?.map((e) => e.name).toList());
   writer.writeObject<Skill>(
     offsets[6],
     allOffsets,
@@ -127,9 +138,10 @@ UserEntity _userEntityDeserialize(
   object.id = id;
   object.isDrinkingAlcohol = reader.readBool(offsets[3]);
   object.name = reader.readString(offsets[4]);
-  object.pet =
-      _UserEntitypetValueEnumMap[reader.readStringOrNull(offsets[5])] ??
-          Pet.dog;
+  object.pets = reader
+      .readStringList(offsets[5])
+      ?.map((e) => _UserEntitypetsValueEnumMap[e] ?? Pet.dog)
+      .toList();
   object.skill = reader.readObjectOrNull<Skill>(
     offsets[6],
     SkillSchema.deserialize,
@@ -160,8 +172,10 @@ P _userEntityDeserializeProp<P>(
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (_UserEntitypetValueEnumMap[reader.readStringOrNull(offset)] ??
-          Pet.dog) as P;
+      return (reader
+          .readStringList(offset)
+          ?.map((e) => _UserEntitypetsValueEnumMap[e] ?? Pet.dog)
+          .toList()) as P;
     case 6:
       return (reader.readObjectOrNull<Skill>(
         offset,
@@ -203,14 +217,14 @@ const _UserEntityhomeTownValueEnumMap = {
   r'Fukuoka': HomeTown.Fukuoka,
   r'Sendai': HomeTown.Sendai,
 };
-const _UserEntitypetEnumValueMap = {
+const _UserEntitypetsEnumValueMap = {
   r'dog': r'dog',
   r'cat': r'cat',
   r'rabbit': r'rabbit',
   r'parrot': r'parrot',
   r'hamster': r'hamster',
 };
-const _UserEntitypetValueEnumMap = {
+const _UserEntitypetsValueEnumMap = {
   r'dog': Pet.dog,
   r'cat': Pet.cat,
   r'rabbit': Pet.rabbit,
@@ -745,20 +759,38 @@ extension UserEntityQueryFilter
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petEqualTo(
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'pets',
+      ));
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'pets',
+      ));
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementEqualTo(
     Pet value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pet',
+        property: r'pets',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petGreaterThan(
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementGreaterThan(
     Pet value, {
     bool include = false,
     bool caseSensitive = true,
@@ -766,14 +798,15 @@ extension UserEntityQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'pet',
+        property: r'pets',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petLessThan(
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementLessThan(
     Pet value, {
     bool include = false,
     bool caseSensitive = true,
@@ -781,14 +814,15 @@ extension UserEntityQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'pet',
+        property: r'pets',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petBetween(
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementBetween(
     Pet lower,
     Pet upper, {
     bool includeLower = true,
@@ -797,7 +831,7 @@ extension UserEntityQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'pet',
+        property: r'pets',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -807,71 +841,159 @@ extension UserEntityQueryFilter
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petStartsWith(
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'pet',
+        property: r'pets',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petEndsWith(
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'pet',
+        property: r'pets',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'pet',
+        property: r'pets',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'pet',
+        property: r'pets',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petIsEmpty() {
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'pet',
+        property: r'pets',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petIsNotEmpty() {
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'pet',
+        property: r'pets',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pets',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pets',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pets',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pets',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition>
+      petsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pets',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<UserEntity, UserEntity, QAfterFilterCondition> petsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'pets',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -969,18 +1091,6 @@ extension UserEntityQuerySortBy
       return query.addSortBy(r'name', Sort.desc);
     });
   }
-
-  QueryBuilder<UserEntity, UserEntity, QAfterSortBy> sortByPet() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'pet', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserEntity, UserEntity, QAfterSortBy> sortByPetDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'pet', Sort.desc);
-    });
-  }
 }
 
 extension UserEntityQuerySortThenBy
@@ -1059,18 +1169,6 @@ extension UserEntityQuerySortThenBy
       return query.addSortBy(r'name', Sort.desc);
     });
   }
-
-  QueryBuilder<UserEntity, UserEntity, QAfterSortBy> thenByPet() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'pet', Sort.asc);
-    });
-  }
-
-  QueryBuilder<UserEntity, UserEntity, QAfterSortBy> thenByPetDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'pet', Sort.desc);
-    });
-  }
 }
 
 extension UserEntityQueryWhereDistinct
@@ -1109,10 +1207,9 @@ extension UserEntityQueryWhereDistinct
     });
   }
 
-  QueryBuilder<UserEntity, UserEntity, QDistinct> distinctByPet(
-      {bool caseSensitive = true}) {
+  QueryBuilder<UserEntity, UserEntity, QDistinct> distinctByPets() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'pet', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'pets');
     });
   }
 }
@@ -1156,9 +1253,9 @@ extension UserEntityQueryProperty
     });
   }
 
-  QueryBuilder<UserEntity, Pet, QQueryOperations> petProperty() {
+  QueryBuilder<UserEntity, List<Pet>?, QQueryOperations> petsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'pet');
+      return query.addPropertyName(r'pets');
     });
   }
 

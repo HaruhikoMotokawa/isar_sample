@@ -23,7 +23,15 @@ class UserListTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Age: ${user.age}, Hometown: ${user.homeTown.name}'),
-          Text('Pet: ${user.pet.species} (${user.pet.age} years old)'),
+          if (user.pets != null) ...[
+            for (var i = 0; i < user.pets!.length; i++)
+              // 名前の前に番号を表示する
+              Text(
+                'pet ${i + 1}:'
+                ' ${user.pets![i].species} (${user.pets![i].age} years old)',
+              ),
+          ] else
+            const Text('No pets'),
           Text('Power Level: ${user.dragonBallCharacter.powerLevel}'),
           if (user.skill != null) ...[
             Text('Skill: ${user.skill!.name}'),

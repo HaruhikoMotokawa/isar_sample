@@ -105,7 +105,7 @@ extension UserEntityMapper on UserEntity {
       age: age,
       isDrinkingAlcohol: isDrinkingAlcohol,
       homeTown: homeTown,
-      pet: pet,
+      pets: pets,
       dragonBallCharacter: dragonBallCharacter,
       skill: skill != null
           ? Skill(
@@ -127,7 +127,7 @@ extension UserMapper on User {
       ..age = age
       ..isDrinkingAlcohol = isDrinkingAlcohol
       ..homeTown = homeTown
-      ..pet = pet
+      ..pets = pets
       ..dragonBallCharacter = dragonBallCharacter
       ..skill = skill != null
           ? Skill(

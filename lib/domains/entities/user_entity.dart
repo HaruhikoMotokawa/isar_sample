@@ -22,15 +22,16 @@ class UserEntity {
   @Enumerated(EnumType.name)
   late HomeTown homeTown;
 
-  /// 飼っているペット
+  /// 飼っているペット達
   ///
-  /// 複数のプロパティを持つ列挙型を保存する場合、EnumType.nameを指定する
+  /// Enumをリストでも保存できる
+  /// EnumType.nameで保存することでデータベース上には文字列として保存される
   @Enumerated(EnumType.name)
-  late Pet pet;
+  late List<Pet>? pets;
 
   /// ドラゴンボールのキャラクターに例えた戦闘力
   ///
-  /// EnumType.valueを指定することで、列挙型の値を保存できる
+  /// EnumType.valueを指定することで、そのフィールドの値でデータベースに保存される
   /// EnumType.valueでするpropertyはStringで指定するのでタイポに注意
   @Enumerated(EnumType.value, 'powerLevel')
   late DragonBallCharacter dragonBallCharacter;

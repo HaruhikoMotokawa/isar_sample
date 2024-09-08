@@ -13,8 +13,8 @@ class User {
     required this.age,
     required this.isDrinkingAlcohol,
     required this.homeTown,
-    required this.pet,
     required this.dragonBallCharacter,
+    this.pets,
     this.id,
     this.skill,
   });
@@ -35,7 +35,12 @@ class User {
                 description: 'A random skill',
                 yearsOfExperience: Random().nextInt(10),
               ),
-        pet = Pet.values[Random().nextInt(Pet.values.length)],
+        pets = Random().nextInt(4) == 0
+            ? null
+            : List<Pet>.generate(
+                Random().nextInt(3) + 1, // 1 ~ 3 つのペットを生成
+                (_) => Pet.values[Random().nextInt(Pet.values.length)],
+              ),
         dragonBallCharacter = DragonBallCharacter
             .values[Random().nextInt(DragonBallCharacter.values.length)];
 
@@ -44,7 +49,7 @@ class User {
   final int age;
   final bool isDrinkingAlcohol;
   final HomeTown homeTown;
-  final Pet pet;
+  final List<Pet>? pets;
   final DragonBallCharacter dragonBallCharacter;
   final Skill? skill;
 
@@ -55,7 +60,7 @@ class User {
     int? age,
     bool? isDrinkingAlcohol,
     HomeTown? homeTown,
-    Pet? pet,
+    List<Pet>? pets,
     DragonBallCharacter? dragonBallCharacter,
     Skill? skill,
   }) {
@@ -65,7 +70,7 @@ class User {
       age: age ?? this.age,
       isDrinkingAlcohol: isDrinkingAlcohol ?? this.isDrinkingAlcohol,
       homeTown: homeTown ?? this.homeTown,
-      pet: pet ?? this.pet,
+      pets: pets ?? this.pets,
       dragonBallCharacter: dragonBallCharacter ?? this.dragonBallCharacter,
       skill: skill ?? this.skill,
     );
@@ -78,7 +83,7 @@ class User {
       age: randomUser.age,
       isDrinkingAlcohol: randomUser.isDrinkingAlcohol,
       homeTown: randomUser.homeTown,
-      pet: randomUser.pet,
+      pets: randomUser.pets,
       dragonBallCharacter: randomUser.dragonBallCharacter,
       skill: randomUser.skill,
     );
