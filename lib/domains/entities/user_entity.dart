@@ -1,5 +1,3 @@
-// ignore_for_file: constant_identifier_names, public_member_api_docs
-
 import 'package:isar/isar.dart';
 import 'package:isar_sample/domains/dragon_ball_character.dart';
 import 'package:isar_sample/domains/home_town.dart';
