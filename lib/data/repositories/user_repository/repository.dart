@@ -83,7 +83,6 @@ class UserRepository implements UserRepositoryBase {
   @override
   Future<void> deleteBatch(List<int> userIds, {bool sync = false}) async {
     final isar = await ref.read(isarProvider.future);
-
     if (sync) {
       isar.writeTxnSync(() {
         isar.userEntitys.deleteAllSync(userIds);
