@@ -8,7 +8,14 @@ part of 'isar.dart';
 
 String _$isarHash() => r'407eccf2ff271299b58e86d18fd500604e86b151';
 
-/// See also [isar].
+/// Isarデータベースのインスタンスを提供するリバー・ポッドプロバイダー。
+/// このプロバイダーは`keepAlive`が`true`に設定されており、アプリケーションのライフサイクル全体で
+/// Isarインスタンスを保持します。
+///
+/// 戻り値:
+/// Isarインスタンスを非同期で返します。
+///
+/// Copied from [isar].
 @ProviderFor(isar)
 final isarProvider = FutureProvider<Isar>.internal(
   isar,
