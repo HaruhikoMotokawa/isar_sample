@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar_sample/core/log/logger.dart';
+import 'package:isar_sample/data/repositories/user_repository/provider.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:isar_sample/presentations/home_screen/components/action_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/user_list_tile.dart';
@@ -17,69 +17,73 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final viewModel = ref.watch(homeViewModelProvider.notifier);
 
-    final users = useState<List<User>>([]);
+    final userList = ref.watch(userListProvider);
 
-    useEffect(
-      () {
-        viewModel.fetchAllUsers().then((fetchUsers) {
-          users.value = fetchUsers;
-        });
-        return null;
-      },
-      [],
-    );
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('isar_sample'),
-        backgroundColor: Colors.lightBlueAccent,
-      ),
-      body: ListView.builder(
-        itemCount: users.value.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: const BorderSide(color: Colors.grey),
-                bottom: index == users.value.length - 1
-                    ? const BorderSide(color: Colors.grey)
-                    : BorderSide.none,
-              ),
-            ),
-            child: UserListTile(
-              user: users.value[index],
-              onTap: () => updateUserAction(
-                context,
-                viewModel,
-                users,
-                users.value[index],
-              ),
-              onLongPress: () => deleteUserAction(
-                context,
-                viewModel,
-                users,
-                users.value[index],
-              ),
-            ),
-          );
-        },
-      ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () => deleteUsersAction(context, viewModel, users),
+    return switch (userList) {
+      AsyncData(:final value) => Scaffold(
+          appBar: AppBar(
+            title: const Text('isar_sample'),
             backgroundColor: Colors.lightBlueAccent,
-            child: const Icon(Icons.local_fire_department),
           ),
-          const Gap(10),
-          FloatingActionButton(
-            onPressed: () => createUserAction(context, viewModel, users),
-            backgroundColor: Colors.lightBlueAccent,
-            child: const Icon(Icons.add),
+          body: ListView.builder(
+            itemCount: value.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: const BorderSide(color: Colors.grey),
+                    bottom: index == value.length - 1
+                        ? const BorderSide(color: Colors.grey)
+                        : BorderSide.none,
+                  ),
+                ),
+                child: UserListTile(
+                  user: value[index],
+                  onTap: () => updateUserAction(
+                    context,
+                    viewModel,
+                    value[index],
+                  ),
+                  onLongPress: () => deleteUserAction(
+                    context,
+                    viewModel,
+                    value[index],
+                  ),
+                ),
+              );
+            },
           ),
-        ],
-      ),
-    );
+          floatingActionButton: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
+                onPressed: () => deleteUsersAction(context, viewModel, value),
+                backgroundColor: Colors.lightBlueAccent,
+                child: const Icon(Icons.local_fire_department),
+              ),
+              const Gap(10),
+              FloatingActionButton(
+                onPressed: () => createUserAction(context, viewModel),
+                backgroundColor: Colors.lightBlueAccent,
+                child: const Icon(Icons.add),
+              ),
+            ],
+          ),
+        ),
+      AsyncError(:final error, :final stackTrace) => Scaffold(
+          body: Center(
+            child: Text('error; $error, stackTrace: $stackTrace'),
+          ),
+        ),
+      _ => const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.lightBlueAccent,
+              color: Colors.white,
+            ),
+          ),
+        )
+    };
   }
 }
 
@@ -88,7 +92,6 @@ extension on HomeScreen {
   Future<void> createUserAction(
     BuildContext context,
     HomeViewModel viewModel,
-    ValueNotifier<List<User>> users,
   ) async {
     // ボトムシートを展開してアクションを選択する
     final result = await ActionBottomSheet.show<CreateActionType>(
@@ -114,35 +117,25 @@ extension on HomeScreen {
 
     if (result == null || !context.mounted) return;
 
-    // オーバーレイにインジケーターを表示
-    final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-    overlay.insert(overlayEntry);
-
     // 作成するユーザー数
     const number = 100000;
     try {
       // ユーザーを作成して取得
       switch (result) {
         case CreateActionType.single:
-          users.value = await viewModel.createAndFetchUser();
+          await viewModel.create();
         case CreateActionType.batchUseSync:
-          users.value = await viewModel.createBatchAndFetchUser(
+          await viewModel.createBatch(
             useSync: true,
             number: number,
           );
         case CreateActionType.batchUseAsync:
-          users.value = await viewModel.createBatchAndFetchUser(
+          await viewModel.createBatch(
             useSync: false,
             number: number,
           );
       }
-      // インジケーターを閉じる
-      overlayEntry.remove();
+
       if (!context.mounted) return;
       // スナックバーを表示
       switch (result) {
@@ -155,7 +148,6 @@ extension on HomeScreen {
       }
     } catch (e, s) {
       logger.e('エラー発生', error: e, stackTrace: s);
-      overlayEntry.remove();
       if (!context.mounted) return;
       showSnackBar(context, 'エラーが発生しました');
     }
@@ -165,7 +157,7 @@ extension on HomeScreen {
   Future<void> deleteUsersAction(
     BuildContext context,
     HomeViewModel viewModel,
-    ValueNotifier<List<User>> users,
+    List<User> users,
   ) async {
     // ボトムシートを展開してアクションを選択する
     final result = await ActionBottomSheet.show<DeleteActionType>(
@@ -190,14 +182,6 @@ extension on HomeScreen {
     );
 
     if (result == null || !context.mounted) return;
-    // オーバーレイにインジケーターを表示
-    final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-    overlay.insert(overlayEntry);
 
     // 削除するユーザー数
     const number = 300;
@@ -205,23 +189,22 @@ extension on HomeScreen {
       // ユーザーを削除して取得
       switch (result) {
         case DeleteActionType.all:
-          users.value = await viewModel.initUser();
+          await viewModel.initUser();
         case DeleteActionType.batchUseSync:
-          users.value = await viewModel.deleteBatchAndFetchUser(
-            users: users.value,
+          await viewModel.deleteBatch(
+            users: users,
             useSync: true,
             number: number,
           );
         case DeleteActionType.batchUseAsync:
-          users.value = await viewModel.deleteBatchAndFetchUser(
-            users: users.value,
+          await viewModel.deleteBatch(
+            users: users,
             useSync: false,
             number: number,
           );
       }
       if (!context.mounted) return;
-      // インジケーターを閉じる
-      overlayEntry.remove();
+
       // スナックバーを表示
       switch (result) {
         case DeleteActionType.all:
@@ -233,7 +216,6 @@ extension on HomeScreen {
       }
     } catch (e, s) {
       logger.e('エラー発生', error: e, stackTrace: s);
-      overlayEntry.remove();
       if (!context.mounted) return;
       showSnackBar(context, 'エラーが発生しました');
     }
@@ -243,10 +225,9 @@ extension on HomeScreen {
   Future<void> updateUserAction(
     BuildContext context,
     HomeViewModel viewModel,
-    ValueNotifier<List<User>> users,
     User updateUser,
   ) async {
-    users.value = await viewModel.updateAndFetchUser(updateUser);
+    await viewModel.update(updateUser);
     if (!context.mounted) return;
     showSnackBar(context, '${updateUser.name}を更新しました');
   }
@@ -255,10 +236,9 @@ extension on HomeScreen {
   Future<void> deleteUserAction(
     BuildContext context,
     HomeViewModel viewModel,
-    ValueNotifier<List<User>> users,
     User deleteUser,
   ) async {
-    users.value = await viewModel.deleteAndFetchUser(deleteUser);
+    await viewModel.delete(deleteUser);
     if (!context.mounted) return;
     showSnackBar(context, '${deleteUser.name}を削除しました');
   }

@@ -15,60 +15,47 @@ class HomeViewModel extends _$HomeViewModel {
   final _stopwatch = Stopwatch();
 
   /// ユーザー情報の作成と取得
-  Future<List<User>> createAndFetchUser() async {
+  Future<void> create() async {
     final user = User.random();
     _stopwatch.start();
     await ref.read(userRepositoryProvider).save(user);
     _stopwatch.stop();
     logger.i('save: ${_stopwatch.elapsedMilliseconds}ms');
-    return fetchAllUsers();
-  }
-
-  /// ユーザー情報の取得
-  Future<List<User>> fetchAllUsers() async {
-    _stopwatch.start();
-    final list = await ref.read(userRepositoryProvider).findAll();
-    _stopwatch.stop();
-    logger.i('findAll: ${_stopwatch.elapsedMilliseconds}ms');
-    return list;
   }
 
   /// ユーザー情報の更新と取得
   ///
   /// 更新内容はidとname以外の項目をランダムに更新する
-  Future<List<User>> updateAndFetchUser(User user) async {
+  Future<void> update(User user) async {
     final updatedUser = user.createUpdatedUser();
     _stopwatch.start();
     await ref.read(userRepositoryProvider).save(updatedUser);
     _stopwatch.stop();
     logger.i('save: ${_stopwatch.elapsedMilliseconds}ms');
-    return fetchAllUsers();
   }
 
   /// ユーザー情報の削除と取得
-  Future<List<User>> deleteAndFetchUser(User user) async {
+  Future<void> delete(User user) async {
     final userId = user.id;
-    if (userId == null) return fetchAllUsers();
+    if (userId == null) return;
     _stopwatch.start();
     await ref.read(userRepositoryProvider).delete(userId);
     _stopwatch.stop();
     logger.i('delete: ${_stopwatch.elapsedMilliseconds}ms');
-    return fetchAllUsers();
   }
 
   /// ユーザー情報の初期化
-  Future<List<User>> initUser() async {
+  Future<void> initUser() async {
     _stopwatch.start();
     await ref.read(userRepositoryProvider).deleteAll();
     _stopwatch.stop();
     logger.i('deleteAll: ${_stopwatch.elapsedMilliseconds}ms');
-    return [];
   }
 
   /// 複数のユーザー情報を作成して取得する
   ///
   /// 引数に同期処理で実行するか非同期処理で実行するか選択できる
-  Future<List<User>> createBatchAndFetchUser({
+  Future<void> createBatch({
     required bool useSync,
     required int number,
   }) async {
@@ -77,14 +64,13 @@ class HomeViewModel extends _$HomeViewModel {
     await ref.read(userRepositoryProvider).saveBatch(users, sync: useSync);
     _stopwatch.stop();
     logger.i('saveBatch/sync $useSync : ${_stopwatch.elapsedMilliseconds}ms');
-    return fetchAllUsers();
   }
 
   /// ユーザーをランダムで３つ削除する
   ///
   /// 引数で受け取ったユーザー情報リストの中からランダムで３つのユーザーを削除する
   /// 引数に同期処理で実行するか非同期処理で実行するか選択できる
-  Future<List<User>> deleteBatchAndFetchUser({
+  Future<void> deleteBatch({
     required List<User> users,
     required bool useSync,
     required int number,
@@ -99,6 +85,5 @@ class HomeViewModel extends _$HomeViewModel {
     await ref.read(userRepositoryProvider).deleteBatch(userIds, sync: useSync);
     _stopwatch.stop();
     logger.i('deleteBatch/sync $useSync: ${_stopwatch.elapsedMilliseconds}ms');
-    return fetchAllUsers();
   }
 }
