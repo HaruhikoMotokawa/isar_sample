@@ -14,7 +14,7 @@ class HomeViewModel extends _$HomeViewModel {
   void build() {}
   final _stopwatch = Stopwatch();
 
-  /// ユーザー情報の作成と取得
+  /// ユーザー情報の作成
   Future<void> create() async {
     final user = User.random();
     _stopwatch.start();
@@ -23,7 +23,7 @@ class HomeViewModel extends _$HomeViewModel {
     logger.i('save: ${_stopwatch.elapsedMilliseconds}ms');
   }
 
-  /// ユーザー情報の更新と取得
+  /// ユーザー情報の更新
   ///
   /// 更新内容はidとname以外の項目をランダムに更新する
   Future<void> update(User user) async {
@@ -52,7 +52,7 @@ class HomeViewModel extends _$HomeViewModel {
     logger.i('deleteAll: ${_stopwatch.elapsedMilliseconds}ms');
   }
 
-  /// 複数のユーザー情報を作成して取得する
+  /// 複数のユーザー情報を作成する
   ///
   /// 引数に同期処理で実行するか非同期処理で実行するか選択できる
   Future<void> createBatch({
