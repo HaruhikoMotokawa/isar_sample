@@ -8,7 +8,7 @@ import 'package:isar_sample/presentations/home_screen/components/action_bottom_s
 import 'package:isar_sample/presentations/home_screen/components/user_list_tile.dart';
 import 'package:isar_sample/presentations/home_screen/home_view_model.dart';
 
-class HomeScreen extends HookConsumerWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({
     super.key,
   });
