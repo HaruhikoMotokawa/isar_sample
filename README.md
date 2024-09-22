@@ -21,3 +21,11 @@ Isarの公式ドキュメント：https://isar.dev/ja/
 2. Isarで保存できる*埋め込み型オブジェクト*について
 3. 複数のデータを保存、削除する
 4. 同期と非同期
+
+## feature/third_contact
+
+記事のリンク：https://qiita.com/Harx02663971/items/13a3cd93d599c792b88e
+
+1. 過去プロジェクトのデータ取得方法の問題点
+2. Isarデータベースの変更を監視する
+3. AsyncValueで状態をリアルタイムに反映する

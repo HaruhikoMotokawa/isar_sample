@@ -26,6 +26,9 @@ abstract interface class UserRepositoryBase {
   ///
   /// オプションで同期出来るようにする
   Future<void> deleteBatch(List<int> userIds, {bool sync = false});
+
+  // Userコレクションを監視する
+  Stream<List<User>> watch();
 }
 
 class UserRepository implements UserRepositoryBase {
@@ -91,6 +94,16 @@ class UserRepository implements UserRepositoryBase {
       await isar.writeTxn(() async {
         await isar.userEntitys.deleteAll(userIds);
       });
+    }
+  }
+
+  @override
+  Stream<List<User>> watch() async* {
+    final isar = await ref.read(isarProvider.future);
+    // watchLazy で変更を監視
+    final userStream = isar.userEntitys.watchLazy(fireImmediately: true);
+    await for (final _ in userStream) {
+      yield await findAll();
     }
   }
 }
