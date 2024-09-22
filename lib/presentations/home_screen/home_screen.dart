@@ -19,71 +19,71 @@ class HomeScreen extends HookConsumerWidget {
 
     final userList = ref.watch(userListProvider);
 
-    return switch (userList) {
-      AsyncData(:final value) => Scaffold(
-          appBar: AppBar(
-            title: const Text('isar_sample'),
-            backgroundColor: Colors.lightBlueAccent,
-          ),
-          body: ListView.builder(
-            itemCount: value.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: const BorderSide(color: Colors.grey),
-                    bottom: index == value.length - 1
-                        ? const BorderSide(color: Colors.grey)
-                        : BorderSide.none,
-                  ),
-                ),
-                child: UserListTile(
-                  user: value[index],
-                  onTap: () => updateUserAction(
-                    context,
-                    viewModel,
-                    value[index],
-                  ),
-                  onLongPress: () => deleteUserAction(
-                    context,
-                    viewModel,
-                    value[index],
-                  ),
-                ),
-              );
-            },
-          ),
-          floatingActionButton: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              FloatingActionButton(
-                onPressed: () => deleteUsersAction(context, viewModel, value),
-                backgroundColor: Colors.lightBlueAccent,
-                child: const Icon(Icons.local_fire_department),
-              ),
-              const Gap(10),
-              FloatingActionButton(
-                onPressed: () => createUserAction(context, viewModel),
-                backgroundColor: Colors.lightBlueAccent,
-                child: const Icon(Icons.add),
-              ),
-            ],
-          ),
+    return userList.when(
+      data: (value) => Scaffold(
+        appBar: AppBar(
+          title: const Text('isar_sample'),
+          backgroundColor: Colors.lightBlueAccent,
         ),
-      AsyncError(:final error, :final stackTrace) => Scaffold(
-          body: Center(
-            child: Text('error; $error, stackTrace: $stackTrace'),
-          ),
+        body: ListView.builder(
+          itemCount: value.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: const BorderSide(color: Colors.grey),
+                  bottom: index == value.length - 1
+                      ? const BorderSide(color: Colors.grey)
+                      : BorderSide.none,
+                ),
+              ),
+              child: UserListTile(
+                user: value[index],
+                onTap: () => updateUserAction(
+                  context,
+                  viewModel,
+                  value[index],
+                ),
+                onLongPress: () => deleteUserAction(
+                  context,
+                  viewModel,
+                  value[index],
+                ),
+              ),
+            );
+          },
         ),
-      _ => const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () => deleteUsersAction(context, viewModel, value),
               backgroundColor: Colors.lightBlueAccent,
-              color: Colors.white,
+              child: const Icon(Icons.local_fire_department),
             ),
+            const Gap(10),
+            FloatingActionButton(
+              onPressed: () => createUserAction(context, viewModel),
+              backgroundColor: Colors.lightBlueAccent,
+              child: const Icon(Icons.add),
+            ),
+          ],
+        ),
+      ),
+      error: (error, stackTrace) => Scaffold(
+        body: Center(
+          child: Text('error; $error, stackTrace: $stackTrace'),
+        ),
+      ),
+      loading: () => const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            backgroundColor: Colors.lightBlueAccent,
+            color: Colors.white,
           ),
-        )
-    };
+        ),
+      ),
+    );
   }
 }
 
@@ -117,10 +117,19 @@ extension on HomeScreen {
 
     if (result == null || !context.mounted) return;
 
+    // オーバーレイにインジケーターを表示
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+    overlay.insert(overlayEntry);
+
     // 作成するユーザー数
     const number = 100000;
     try {
-      // ユーザーを作成して取得
+      // ユーザーを作成
       switch (result) {
         case CreateActionType.single:
           await viewModel.create();
@@ -136,6 +145,9 @@ extension on HomeScreen {
           );
       }
 
+      // インジケーターを閉じる
+      overlayEntry.remove();
+
       if (!context.mounted) return;
       // スナックバーを表示
       switch (result) {
@@ -148,6 +160,10 @@ extension on HomeScreen {
       }
     } catch (e, s) {
       logger.e('エラー発生', error: e, stackTrace: s);
+
+      // インジケーターを閉じる
+      overlayEntry.remove();
+
       if (!context.mounted) return;
       showSnackBar(context, 'エラーが発生しました');
     }
