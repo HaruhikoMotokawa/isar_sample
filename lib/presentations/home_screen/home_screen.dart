@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar_sample/core/log/logger.dart';
 import 'package:isar_sample/data/repositories/user_repository/provider.dart';
 import 'package:isar_sample/domains/user.dart';
-import 'package:isar_sample/presentations/home_screen/components/action_bottom_sheet.dart';
+import 'package:isar_sample/presentations/_shared/action_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/user_list_tile.dart';
 import 'package:isar_sample/presentations/home_screen/home_view_model.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends HookConsumerWidget {
   const HomeScreen({
     super.key,
   });
@@ -19,39 +20,109 @@ class HomeScreen extends ConsumerWidget {
 
     final userList = ref.watch(userListProvider);
 
+    final isSearchActive = useState(false);
+
+    final searchController = useTextEditingController();
+
+    final displayWidth = MediaQuery.sizeOf(context).width;
+
     return userList.when(
       data: (value) => Scaffold(
         appBar: AppBar(
           title: const Text('isar_sample'),
           backgroundColor: Colors.lightBlueAccent,
         ),
-        body: ListView.builder(
-          itemCount: value.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: const BorderSide(color: Colors.grey),
-                  bottom: index == value.length - 1
-                      ? const BorderSide(color: Colors.grey)
-                      : BorderSide.none,
+        body: Column(
+          children: [
+            Stack(
+              alignment: AlignmentDirectional.centerEnd,
+              children: [
+                SizedBox(
+                  height: 60,
+                  width: displayWidth,
+                  child: ColoredBox(color: Colors.indigo[200]!),
                 ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: isSearchActive.value
+                      ? displayWidth
+                      // ディスプレイサイズに応じたデフォルトのアイコンサイズを設定
+                      : 150,
+                  child: isSearchActive.value
+                      ? TextField(
+                          controller: searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search...',
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                // 検索を終了して検索バーを閉じる
+                                isSearchActive.value = false;
+                                searchController.clear();
+                              },
+                            ),
+                          ),
+                          onSubmitted: (query) {
+                            // TODO: 検索処理をここに追加
+                            // 検索完了後に閉じる
+                            isSearchActive.value = true;
+                          },
+                        )
+                      : Row(
+                          children: [
+                            IconButton.outlined(
+                              icon: const Icon(Icons.search),
+                              onPressed: () => isSearchActive.value = true,
+                            ),
+                            IconButton.outlined(
+                              onPressed: () {},
+                              icon: const Icon(Icons.filter_alt_rounded),
+                            ),
+                            IconButton.outlined(
+                              onPressed: () {},
+                              icon: const Icon(Icons.sort),
+                            ),
+                            const Spacer(),
+                          ],
+                        ),
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: value.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: const BorderSide(color: Colors.grey),
+                        bottom: index == value.length - 1
+                            ? const BorderSide(color: Colors.grey)
+                            : BorderSide.none,
+                      ),
+                    ),
+                    child: UserListTile(
+                      user: value[index],
+                      onTap: () => updateUserAction(
+                        context,
+                        viewModel,
+                        value[index],
+                      ),
+                      onLongPress: () => deleteUserAction(
+                        context,
+                        viewModel,
+                        value[index],
+                      ),
+                    ),
+                  );
+                },
               ),
-              child: UserListTile(
-                user: value[index],
-                onTap: () => updateUserAction(
-                  context,
-                  viewModel,
-                  value[index],
-                ),
-                onLongPress: () => deleteUserAction(
-                  context,
-                  viewModel,
-                  value[index],
-                ),
-              ),
-            );
-          },
+            ),
+          ],
         ),
         floatingActionButton: Row(
           mainAxisAlignment: MainAxisAlignment.end,
