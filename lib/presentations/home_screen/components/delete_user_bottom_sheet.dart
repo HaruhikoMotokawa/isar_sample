@@ -10,6 +10,8 @@ class DeleteUserBottomSheet extends StatelessWidget {
   ) async {
     return showModalBottomSheet<DeleteActionType?>(
       context: context,
+      useRootNavigator: true,
+      showDragHandle: true,
       builder: (context) {
         return const DeleteUserBottomSheet();
       },

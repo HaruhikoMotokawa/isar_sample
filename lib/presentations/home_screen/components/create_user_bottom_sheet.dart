@@ -10,6 +10,8 @@ class CreateUserBottomSheet extends StatelessWidget {
   ) async {
     return showModalBottomSheet<CreateActionType?>(
       context: context,
+      useRootNavigator: true,
+      showDragHandle: true,
       builder: (context) {
         return const CreateUserBottomSheet();
       },
