@@ -5,9 +5,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar_sample/core/log/logger.dart';
 import 'package:isar_sample/data/repositories/user_repository/provider.dart';
 import 'package:isar_sample/domains/create_action_type.dart';
+import 'package:isar_sample/domains/delete_action_type.dart';
 import 'package:isar_sample/domains/user.dart';
-import 'package:isar_sample/presentations/_shared/action_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/create_user_bottom_sheet.dart';
+import 'package:isar_sample/presentations/home_screen/components/delete_user_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/user_list_tile.dart';
 import 'package:isar_sample/presentations/home_screen/home_view_model.dart';
 
@@ -230,26 +231,7 @@ extension on HomeScreen {
     List<User> users,
   ) async {
     // ボトムシートを展開してアクションを選択する
-    final result = await ActionBottomSheet.show<DeleteActionType>(
-      context,
-      actions: [
-        ActionItem(
-          icon: Icons.person,
-          text: 'all',
-          onTap: () => DeleteActionType.all,
-        ),
-        ActionItem(
-          icon: Icons.people,
-          text: 'Batch',
-          onTap: () => DeleteActionType.batchUseSync,
-        ),
-        ActionItem(
-          icon: Icons.people,
-          text: 'Batch(Async)',
-          onTap: () => DeleteActionType.batchUseAsync,
-        ),
-      ],
-    );
+    final result = await DeleteUserBottomSheet.show(context);
 
     if (result == null || !context.mounted) return;
 
@@ -321,10 +303,4 @@ extension on HomeScreen {
       ),
     );
   }
-}
-
-enum DeleteActionType {
-  all,
-  batchUseSync,
-  batchUseAsync,
 }
