@@ -4,8 +4,10 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar_sample/core/log/logger.dart';
 import 'package:isar_sample/data/repositories/user_repository/provider.dart';
+import 'package:isar_sample/domains/create_action_type.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:isar_sample/presentations/_shared/action_bottom_sheet.dart';
+import 'package:isar_sample/presentations/home_screen/components/create_user_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/user_list_tile.dart';
 import 'package:isar_sample/presentations/home_screen/home_view_model.dart';
 
@@ -165,26 +167,7 @@ extension on HomeScreen {
     HomeViewModel viewModel,
   ) async {
     // ボトムシートを展開してアクションを選択する
-    final result = await ActionBottomSheet.show<CreateActionType>(
-      context,
-      actions: [
-        ActionItem(
-          icon: Icons.person,
-          text: 'Single',
-          onTap: () => CreateActionType.single,
-        ),
-        ActionItem(
-          icon: Icons.people,
-          text: 'Batch',
-          onTap: () => CreateActionType.batchUseSync,
-        ),
-        ActionItem(
-          icon: Icons.people,
-          text: 'Batch(Async)',
-          onTap: () => CreateActionType.batchUseAsync,
-        ),
-      ],
-    );
+    final result = await CreateUserBottomSheet.show(context);
 
     if (result == null || !context.mounted) return;
 
@@ -338,12 +321,6 @@ extension on HomeScreen {
       ),
     );
   }
-}
-
-enum CreateActionType {
-  single,
-  batchUseSync,
-  batchUseAsync,
 }
 
 enum DeleteActionType {
