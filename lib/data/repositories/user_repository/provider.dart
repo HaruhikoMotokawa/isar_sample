@@ -1,4 +1,5 @@
 import 'package:isar_sample/data/repositories/user_repository/repository.dart';
+import 'package:isar_sample/domains/sort_type.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,6 +11,6 @@ UserRepositoryBase userRepository(UserRepositoryRef ref) {
 }
 
 @riverpod
-Stream<List<User>> userList(UserListRef ref) {
-  return ref.read(userRepositoryProvider).watch();
+Stream<List<User>> userList(UserListRef ref, {required SortType sortType}) {
+  return ref.read(userRepositoryProvider).watch(sortType: sortType);
 }

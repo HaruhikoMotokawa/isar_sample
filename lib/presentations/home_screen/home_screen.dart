@@ -23,13 +23,13 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final viewModel = ref.watch(homeViewModelProvider.notifier);
 
-    final userList = ref.watch(userListProvider);
+    final sortType = useState<SortType>(SortType.nameAsc);
+
+    final userList = ref.watch(userListProvider(sortType: sortType.value));
 
     final isSearchActive = useState(false);
 
     final searchController = useTextEditingController();
-
-    final sortType = useState<SortType>(SortType.nameAsc);
 
     final displayWidth = MediaQuery.sizeOf(context).width;
 
@@ -187,7 +187,7 @@ extension on HomeScreen {
     overlay.insert(overlayEntry);
 
     // 作成するユーザー数
-    const number = 100000;
+    const number = 100;
     try {
       // ユーザーを作成
       switch (result) {

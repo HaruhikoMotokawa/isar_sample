@@ -1,12 +1,14 @@
 import 'package:isar/isar.dart';
+import 'package:isar_sample/core/log/logger.dart';
 import 'package:isar_sample/data/local_sources/isar.dart';
 import 'package:isar_sample/domains/entities/user_entity.dart';
+import 'package:isar_sample/domains/sort_type.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 abstract interface class UserRepositoryBase {
   /// 全てのUser情報を検索する
-  Future<List<User>> findAll();
+  Future<List<User>> findAll({SortType? sortType});
 
   /// Userを保存する
   Future<void> save(User user);
@@ -28,7 +30,7 @@ abstract interface class UserRepositoryBase {
   Future<void> deleteBatch(List<int> userIds, {bool sync = false});
 
   // Userコレクションを監視する
-  Stream<List<User>> watch();
+  Stream<List<User>> watch({required SortType sortType});
 }
 
 class UserRepository implements UserRepositoryBase {
@@ -54,9 +56,25 @@ class UserRepository implements UserRepositoryBase {
   }
 
   @override
-  Future<List<User>> findAll() async {
+  Future<List<User>> findAll({SortType? sortType}) async {
     final isar = await ref.read(isarProvider.future);
-    final userEntitys = await isar.userEntitys.where().findAll();
+
+    final quey = isar.userEntitys.where();
+
+    // ソートの種類によってクエリを変更
+    final sortQuery = switch (sortType) {
+      SortType.nameAsc => quey.sortByName(),
+      SortType.nameDesc => quey.sortByNameDesc(),
+      SortType.ageAsc => quey.sortByAge(),
+      SortType.ageDesc => quey.sortByAgeDesc(),
+      SortType.hometown => quey.sortByHomeTown(),
+      SortType.dragonBallCharacter => quey.sortByDragonBallCharacter(),
+      _ => quey,
+    };
+    final stopwatch = Stopwatch()..start(); // ストップウォッチ開始
+    final userEntitys = await sortQuery.findAll();
+    stopwatch.stop(); // ストップウォッチ終了
+    logger.d('findAll: ${stopwatch.elapsedMilliseconds}ms');
     return userEntitys.map((entity) => entity.toDomain()).toList();
   }
 
@@ -98,12 +116,12 @@ class UserRepository implements UserRepositoryBase {
   }
 
   @override
-  Stream<List<User>> watch() async* {
+  Stream<List<User>> watch({required SortType sortType}) async* {
     final isar = await ref.read(isarProvider.future);
     // watchLazy で変更を監視
     final userStream = isar.userEntitys.watchLazy(fireImmediately: true);
     await for (final _ in userStream) {
-      yield await findAll();
+      yield await findAll(sortType: sortType);
     }
   }
 }
