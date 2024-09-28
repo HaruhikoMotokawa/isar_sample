@@ -6,9 +6,11 @@ import 'package:isar_sample/core/log/logger.dart';
 import 'package:isar_sample/data/repositories/user_repository/provider.dart';
 import 'package:isar_sample/domains/create_action_type.dart';
 import 'package:isar_sample/domains/delete_action_type.dart';
+import 'package:isar_sample/domains/sort_type.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:isar_sample/presentations/home_screen/components/create_user_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/delete_user_bottom_sheet.dart';
+import 'package:isar_sample/presentations/home_screen/components/sort_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/user_list_tile.dart';
 import 'package:isar_sample/presentations/home_screen/home_view_model.dart';
 
@@ -26,6 +28,8 @@ class HomeScreen extends HookConsumerWidget {
     final isSearchActive = useState(false);
 
     final searchController = useTextEditingController();
+
+    final sortType = useState<SortType>(SortType.nameAsc);
 
     final displayWidth = MediaQuery.sizeOf(context).width;
 
@@ -86,7 +90,8 @@ class HomeScreen extends HookConsumerWidget {
                               icon: const Icon(Icons.filter_alt_rounded),
                             ),
                             IconButton.outlined(
-                              onPressed: () {},
+                              onPressed: () =>
+                                  selectSortAction(context, sortType),
                               icon: const Icon(Icons.sort),
                             ),
                             const Spacer(),
@@ -302,5 +307,18 @@ extension on HomeScreen {
         content: Text(content),
       ),
     );
+  }
+
+  Future<void> selectSortAction(
+    BuildContext context,
+    ValueNotifier<SortType> type,
+  ) async {
+    final result = await SortBottomSheet.show(
+      context,
+      type.value,
+    );
+    if (result == null) return;
+    type.value = result;
+    // ソート処理
   }
 }
