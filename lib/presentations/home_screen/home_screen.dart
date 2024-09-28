@@ -187,7 +187,10 @@ extension on HomeScreen {
     overlay.insert(overlayEntry);
 
     // 作成するユーザー数
-    const number = 100;
+    // 視覚的にわかりやすいのは100個
+    // パフォーマーンスを計測するなら100000個
+    // const number = 100;
+    const number = 100000;
     try {
       // ユーザーを作成
       switch (result) {

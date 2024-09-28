@@ -74,7 +74,8 @@ class UserRepository implements UserRepositoryBase {
     final stopwatch = Stopwatch()..start(); // ストップウォッチ開始
     final userEntitys = await sortQuery.findAll();
     stopwatch.stop(); // ストップウォッチ終了
-    logger.d('findAll: ${stopwatch.elapsedMilliseconds}ms');
+    logger
+        .d('findAll: ${stopwatch.elapsedMilliseconds}ms, sortType: $sortType');
     return userEntitys.map((entity) => entity.toDomain()).toList();
   }
 
