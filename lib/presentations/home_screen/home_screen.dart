@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -6,10 +8,12 @@ import 'package:isar_sample/core/log/logger.dart';
 import 'package:isar_sample/data/repositories/user_repository/provider.dart';
 import 'package:isar_sample/domains/create_action_type.dart';
 import 'package:isar_sample/domains/delete_action_type.dart';
+import 'package:isar_sample/domains/filter_type.dart';
 import 'package:isar_sample/domains/sort_type.dart';
 import 'package:isar_sample/domains/user.dart';
 import 'package:isar_sample/presentations/home_screen/components/create_user_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/delete_user_bottom_sheet.dart';
+import 'package:isar_sample/presentations/home_screen/components/filter_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/sort_bottom_sheet.dart';
 import 'package:isar_sample/presentations/home_screen/components/user_list_tile.dart';
 import 'package:isar_sample/presentations/home_screen/home_view_model.dart';
@@ -24,6 +28,8 @@ class HomeScreen extends HookConsumerWidget {
     final viewModel = ref.watch(homeViewModelProvider.notifier);
 
     final sortType = useState<SortType>(SortType.nameAsc);
+
+    final filterList = useState<List<FilterType>>([]);
 
     final userList = ref.watch(userListProvider(sortType: sortType.value));
 
@@ -86,7 +92,8 @@ class HomeScreen extends HookConsumerWidget {
                               onPressed: () => isSearchActive.value = true,
                             ),
                             IconButton.outlined(
-                              onPressed: () {},
+                              onPressed: () =>
+                                  selectFilterAction(context, filterList),
                               icon: const Icon(Icons.filter_alt_rounded),
                             ),
                             IconButton.outlined(
@@ -312,6 +319,7 @@ extension on HomeScreen {
     );
   }
 
+  /// 並び替えを選択する
   Future<void> selectSortAction(
     BuildContext context,
     ValueNotifier<SortType> type,
@@ -323,5 +331,22 @@ extension on HomeScreen {
     if (result == null) return;
     type.value = result;
     // ソート処理
+  }
+
+  /// 絞り込みを選択する
+  Future<void> selectFilterAction(
+    BuildContext context,
+    ValueNotifier<List<FilterType>> filterList,
+  ) async {
+    // ボトムシートを展開してアクションを選択する
+    final result = await FilterBottomSheet.show(context, filterList.value);
+
+    print(result);
+
+    if (result == null) return;
+
+    filterList.value = result;
+
+    // 絞り込み処理
   }
 }
