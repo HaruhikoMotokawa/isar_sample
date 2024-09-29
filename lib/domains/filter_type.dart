@@ -37,3 +37,51 @@ enum FilterType {
 
   final String description;
 }
+
+extension FilterTypeExtension on FilterType {
+  bool get isAgeCategory {
+    switch (this) {
+      case FilterType.young:
+      case FilterType.middleAged:
+      case FilterType.elderly:
+        return true;
+      case _:
+        return false;
+    }
+  }
+
+  bool get isOrigin {
+    switch (this) {
+      case FilterType.originSapporo:
+      case FilterType.originSendai:
+      case FilterType.originTokyo:
+      case FilterType.originOsaka:
+      case FilterType.originKyoto:
+      case FilterType.originFukuoka:
+        return true;
+      case _:
+        return false;
+    }
+  }
+
+  bool get isPet {
+    switch (this) {
+      case FilterType.ownsDog:
+      case FilterType.ownsCat:
+      case FilterType.ownsRabbit:
+      case FilterType.ownsParrot:
+      case FilterType.ownsHamster:
+        return true;
+      case _:
+        return false;
+    }
+  }
+}
+
+extension FilterTypeListExtension on Iterable<FilterType> {
+  List<FilterType> get filterByAgeCategory =>
+      where((type) => type.isAgeCategory).toList();
+  List<FilterType> get filterByOrigin =>
+      where((type) => type.isOrigin).toList();
+  List<FilterType> get filterByPet => where((type) => type.isPet).toList();
+}

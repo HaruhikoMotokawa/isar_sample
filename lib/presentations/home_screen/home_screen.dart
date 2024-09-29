@@ -31,7 +31,9 @@ class HomeScreen extends HookConsumerWidget {
 
     final filterList = useState<List<FilterType>>([]);
 
-    final userList = ref.watch(userListProvider(sortType: sortType.value));
+    final userList = ref.watch(
+      userListProvider(sortType: sortType.value, filters: filterList.value),
+    );
 
     final isSearchActive = useState(false);
 
@@ -330,7 +332,6 @@ extension on HomeScreen {
     );
     if (result == null) return;
     type.value = result;
-    // ソート処理
   }
 
   /// 絞り込みを選択する
@@ -338,15 +339,10 @@ extension on HomeScreen {
     BuildContext context,
     ValueNotifier<List<FilterType>> filterList,
   ) async {
-    // ボトムシートを展開してアクションを選択する
     final result = await FilterBottomSheet.show(context, filterList.value);
-
-    print(result);
 
     if (result == null) return;
 
     filterList.value = result;
-
-    // 絞り込み処理
   }
 }

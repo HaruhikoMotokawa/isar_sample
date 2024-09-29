@@ -21,7 +21,7 @@ final userRepositoryProvider = Provider<UserRepositoryBase>.internal(
 );
 
 typedef UserRepositoryRef = ProviderRef<UserRepositoryBase>;
-String _$userListHash() => r'9bc3ce2299e100d140a1bc85b0597cba4ea9aaff';
+String _$userListHash() => r'2634abe8a416c691e94b4870ef829c80c4fe4ce3';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -56,9 +56,11 @@ class UserListFamily extends Family<AsyncValue<List<User>>> {
   /// See also [userList].
   UserListProvider call({
     required SortType sortType,
+    List<FilterType>? filters,
   }) {
     return UserListProvider(
       sortType: sortType,
+      filters: filters,
     );
   }
 
@@ -68,6 +70,7 @@ class UserListFamily extends Family<AsyncValue<List<User>>> {
   ) {
     return call(
       sortType: provider.sortType,
+      filters: provider.filters,
     );
   }
 
@@ -91,10 +94,12 @@ class UserListProvider extends AutoDisposeStreamProvider<List<User>> {
   /// See also [userList].
   UserListProvider({
     required SortType sortType,
+    List<FilterType>? filters,
   }) : this._internal(
           (ref) => userList(
             ref as UserListRef,
             sortType: sortType,
+            filters: filters,
           ),
           from: userListProvider,
           name: r'userListProvider',
@@ -105,6 +110,7 @@ class UserListProvider extends AutoDisposeStreamProvider<List<User>> {
           dependencies: UserListFamily._dependencies,
           allTransitiveDependencies: UserListFamily._allTransitiveDependencies,
           sortType: sortType,
+          filters: filters,
         );
 
   UserListProvider._internal(
@@ -115,9 +121,11 @@ class UserListProvider extends AutoDisposeStreamProvider<List<User>> {
     required super.debugGetCreateSourceHash,
     required super.from,
     required this.sortType,
+    required this.filters,
   }) : super.internal();
 
   final SortType sortType;
+  final List<FilterType>? filters;
 
   @override
   Override overrideWith(
@@ -133,6 +141,7 @@ class UserListProvider extends AutoDisposeStreamProvider<List<User>> {
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
         sortType: sortType,
+        filters: filters,
       ),
     );
   }
@@ -144,13 +153,16 @@ class UserListProvider extends AutoDisposeStreamProvider<List<User>> {
 
   @override
   bool operator ==(Object other) {
-    return other is UserListProvider && other.sortType == sortType;
+    return other is UserListProvider &&
+        other.sortType == sortType &&
+        other.filters == filters;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, sortType.hashCode);
+    hash = _SystemHash.combine(hash, filters.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -159,6 +171,9 @@ class UserListProvider extends AutoDisposeStreamProvider<List<User>> {
 mixin UserListRef on AutoDisposeStreamProviderRef<List<User>> {
   /// The parameter `sortType` of this provider.
   SortType get sortType;
+
+  /// The parameter `filters` of this provider.
+  List<FilterType>? get filters;
 }
 
 class _UserListProviderElement
@@ -167,6 +182,8 @@ class _UserListProviderElement
 
   @override
   SortType get sortType => (origin as UserListProvider).sortType;
+  @override
+  List<FilterType>? get filters => (origin as UserListProvider).filters;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
