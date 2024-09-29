@@ -190,7 +190,7 @@ extension on HomeScreen {
     // 視覚的にわかりやすいのは100個
     // パフォーマーンスを計測するなら100000個
     // const number = 100;
-    const number = 100000;
+    const number = 1000000;
     try {
       // ユーザーを作成
       switch (result) {
