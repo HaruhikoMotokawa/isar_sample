@@ -59,17 +59,18 @@ class UserRepository implements UserRepositoryBase {
   Future<List<User>> findAll({SortType? sortType}) async {
     final isar = await ref.read(isarProvider.future);
 
-    final quey = isar.userEntitys.where();
+    // where()でクエリを作成
+    final query = isar.userEntitys.where();
 
     // ソートの種類によってクエリを変更
     final sortQuery = switch (sortType) {
-      SortType.nameAsc => quey.sortByName(),
-      SortType.nameDesc => quey.sortByNameDesc(),
-      SortType.ageAsc => quey.sortByAge(),
-      SortType.ageDesc => quey.sortByAgeDesc(),
-      SortType.hometown => quey.sortByHomeTown(),
-      SortType.dragonBallCharacter => quey.sortByDragonBallCharacter(),
-      _ => quey,
+      SortType.nameAsc => query.sortByName(),
+      SortType.nameDesc => query.sortByNameDesc(),
+      SortType.ageAsc => query.sortByAge(),
+      SortType.ageDesc => query.sortByAgeDesc(),
+      SortType.hometown => query.sortByHomeTown(),
+      SortType.dragonBallCharacter => query.sortByDragonBallCharacter(),
+      _ => query,
     };
     final stopwatch = Stopwatch()..start(); // ストップウォッチ開始
     final userEntitys = await sortQuery.findAll();
