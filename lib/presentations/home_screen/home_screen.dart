@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -255,7 +256,7 @@ extension on HomeScreen {
     // 削除するユーザー数
     const number = 300;
     try {
-      // ユーザーを削除して取得
+      // ユーザーを削除
       switch (result) {
         case DeleteActionType.all:
           await viewModel.initUser();
@@ -326,11 +327,13 @@ extension on HomeScreen {
     BuildContext context,
     ValueNotifier<SortType> type,
   ) async {
-    final result = await SortBottomSheet.show(
-      context,
-      type.value,
-    );
-    if (result == null) return;
+    // 並び替えを選択する、戻り値に並び替えのタイプが帰ってくる
+    final result = await SortBottomSheet.show(context, type.value);
+
+    // 並び替えがnullまたは、並び替えが同じ場合は何もしない
+    if (result == null || result == type.value) return;
+
+    // 並び替えを更新
     type.value = result;
   }
 
@@ -339,10 +342,13 @@ extension on HomeScreen {
     BuildContext context,
     ValueNotifier<List<FilterType>> filterList,
   ) async {
+    // 絞り込み条件を選択する、戻り値に条件がリストで帰ってくる
     final result = await FilterBottomSheet.show(context, filterList.value);
 
-    if (result == null) return;
+    // 絞り込み条件がnullまたは、絞り込み条件が同じ場合は何もしない
+    if (result == null || listEquals(result, filterList.value)) return;
 
+    // 絞り込み条件を更新
     filterList.value = result;
   }
 }
